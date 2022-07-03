@@ -1,26 +1,114 @@
+"""Models for posts."""
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
 
-class Post(models.Model):
-    text = models.TextField()
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='posts')
-    image = models.ImageField(
-        upload_to='posts/', null=True, blank=True)
+class Group(models.Model):
+    """Group model definition."""
+
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Название",
+        help_text="Укажите название группы",
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name="Группы")
+    description = models.TextField(
+        verbose_name="Описание группы",
+        help_text="Напишите описание группы"
+    )
 
     def __str__(self):
-        return self.text
+        """__str__ method for Group."""
+        return self.title
+
+
+class Post(models.Model):
+    """Post model definition."""
+
+    text = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="posts"
+    )
+    group = models.ForeignKey(
+        Group,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="posts",
+    )
+    image = models.ImageField(
+        "Картинка",
+        upload_to="posts/",
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        """Meta for Post."""
+
+        ordering = ("pub_date",)
+
+    def __str__(self):
+        """__str__ for Post."""
+        return self.text[:15]
 
 
 class Comment(models.Model):
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments')
+    """Comment model definition."""
+
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField()
-    created = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True)
+        Post,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+    text = models.TextField(
+        verbose_name="Текст",
+        help_text="Текст нового комментария"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Meta for Comment."""
+
+        ordering = ("-created",)
+
+    def __str__(self):
+        """__str__ for Comment."""
+        return self.text
+
+
+class Follow(models.Model):
+    """Follow model definition."""
+
+    user = models.ForeignKey(
+        User,  # vasya.followings = [Follow(user=vasya), ...]
+        on_delete=models.CASCADE,
+        related_name="followings"  # <- user
+    )
+    following = models.ForeignKey(
+        User,  # ivan.followers = [Follow(following=ivan), ...]
+        on_delete=models.CASCADE,
+        related_name="followers"  # <- following
+    )
+
+    class Meta:
+        """Meta for Follow."""
+
+        constraints = [
+            UniqueConstraint(fields=["user", "following"],
+                             name="unique_relationships"),
+        ]
