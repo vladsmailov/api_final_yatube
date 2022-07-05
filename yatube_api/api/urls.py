@@ -5,6 +5,7 @@ from rest_framework.authtoken import views
 from django.urls import include, path
 
 from api.views import PostViewSet, GroupViewSet, CommentViewSet, FollowViewSet
+from posts.models import Follow
 
 
 router = DefaultRouter()
@@ -15,7 +16,7 @@ router.register(
     r'posts/(?P<post_id>\d+)/comments',
     CommentViewSet, basename='comments'
 )
-router.register('follow', FollowViewSet)
+router.register('follow', FollowViewSet, basename=Follow)
 
 urlpatterns = [
     path('v1/', include(router.urls)),

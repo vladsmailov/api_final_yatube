@@ -1,8 +1,9 @@
 """Serializers for api."""
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from posts.models import Comment, Group, Post, Follow, User
+from rest_framework.validators import UniqueTogetherValidator
+# from .validators import FollowValidator
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -50,9 +51,9 @@ class FollowSerializer(serializers.ModelSerializer):
     """Serializer for followings."""
 
     user = serializers.SlugRelatedField(
-        queryset=User.objects.all(),
         slug_field='username',
-        default=serializers.CurrentUserDefault()
+        default=serializers.CurrentUserDefault(),
+        read_only=True,
     )
 
     following = serializers.SlugRelatedField(
@@ -65,12 +66,13 @@ class FollowSerializer(serializers.ModelSerializer):
 
         model = Follow
         fields = '__all__'
-        validators = (
+        validators = [
+            # FollowValidator(),
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=['user', 'following']
             ),
-        )
+        ]
 
     def validate_following(self, following):
         """Check following."""
