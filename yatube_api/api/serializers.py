@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from posts.models import Comment, Group, Post, Follow, User
 from rest_framework.validators import UniqueTogetherValidator
-from .validators import FollowValidator
+from .validators import UniqueValueValidator
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -67,7 +67,7 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = '__all__'
         validators = [
-            FollowValidator(),
+            UniqueValueValidator('user', 'following'),
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=['user', 'following']

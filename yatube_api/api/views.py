@@ -7,7 +7,6 @@ from rest_framework.permissions import (
 )
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import filters
-from rest_framework import mixins
 
 from posts.models import Group, Post
 from .permissions import IsOwnerOrReadOnly
@@ -17,16 +16,7 @@ from .serializers import (
     PostSerializer,
     FollowSerializer
 )
-
-
-class CreateListViewSet(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    """Custom ViewSet based on Create-, List-, mixins."""
-
-    pass
+from .mixins import CreateListViewSet
 
 
 class PostViewSet(viewsets.ModelViewSet):
