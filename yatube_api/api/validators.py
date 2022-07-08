@@ -11,10 +11,6 @@ class UniqueValueValidator:
 
     def __call__(self, values):
         """Values validation."""
-        for first_key in self.fields:
-            for second_key in self.fields:
-                if (
-                    first_key != second_key
-                    and values[first_key] == values[second_key]
-                ):
-                    raise serializers.ValidationError('Self-following error!')
+        fields_count = {values[field] for field in self.fields}
+        if len(fields_count) != len(self.fields):
+            raise serializers.ValidationError('Self-following error!')
